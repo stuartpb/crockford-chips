@@ -3,7 +3,7 @@ alphabet = [
   "8","9","A","B","C","D","E","F",
   "G","H","J","K","M","N","P","Q",
   "R","S","T","V","W","X","Y","Z"];
-chip_diam = 40;
+chip_diam = 39;
 chip_thickness = 3.5;
 
 rim_font = "Inconsolata:style=Expanded Black";
