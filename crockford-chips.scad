@@ -73,39 +73,57 @@ module chip_edge_labels(order,bit,pos) {
         rim_digit_size, rim_font);
   }
 }
+
 module chip_base() {
   cylinder(h=chip_thickness, d=chip_diam, center=true);
 }
+
+module outer_face(order,bit) {
+  chip_edge_labels(order,bit,0);
+  difference() {
+    pinwheel(4);
+    circle(r=chip_diam/2-rim_radius);
+    chip_edge_labels(order,bit,1);
+  }
+  face_rings(order,bit);
+}
+
+module obverse(order) {
+  union () {
+    outer_face(order, 1);
+    difference() {
+      circle(d=chip_center_diam);
+      chip_label(alphabet[2^order],
+        decal_digit_size,decal_font);
+    }
+  }
+}
+
+module reverse(order) {
+  union () {
+    outer_face(order, 0);
+    chip_label(alphabet[0],decal_digit_size,decal_font);
+    translate([decal_digit_size/2,decal_digit_size/2])
+      chip_label(alphabet[order],rim_digit_size,decal_font);
+  }
+}
+
 module chip_neg(order) {
   inset_height = chip_thickness/2 - detail_inset;
-  translate([0,0,inset_height])
-    linear_extrude(2*detail_inset) union () {
-      chip_edge_labels(order,1,0);
-      difference() {
+  union () {
+    translate([0,0,inset_height])
+      linear_extrude(2*detail_inset) obverse(order);
+    rotate([180,0,0]) translate([0,0,inset_height])
+      linear_extrude(2*detail_inset) reverse(order);
+    translate([0,0,-chip_thickness/2])
+      linear_extrude(chip_thickness) intersection() {
         pinwheel(4);
-        circle(r=chip_diam/2-rim_radius);
-        chip_edge_labels(order,1,1);
+        difference() {
+          circle(d=chip_diam+inset_height);
+          circle(d=chip_diam-2*inset_height);
+        }
       }
-      difference() {
-        circle(d=chip_center_diam);
-        chip_label(alphabet[2^order],
-          decal_digit_size,decal_font);
-      }
-      face_rings(order,1);
-    }
-  rotate([180,0,0]) translate([0,0,inset_height])
-    linear_extrude(2*detail_inset) union () {
-      chip_edge_labels(order,0,0);
-      difference() {
-        pinwheel(4);
-        circle(r=chip_diam/2-rim_radius);
-        chip_edge_labels(order,0,1);
-      }
-      chip_label(alphabet[0],decal_digit_size,decal_font);
-      translate([decal_digit_size/2,decal_digit_size/2])
-        chip_label(alphabet[order],rim_digit_size,decal_font);
-      face_rings(order,0);
-    }
+  }
 }
 module chip_detail(order) {
   intersection() {
