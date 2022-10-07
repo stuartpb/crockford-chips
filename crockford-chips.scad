@@ -9,6 +9,7 @@ chip_thickness = 3.5;
 rim_font = "Inconsolata:style=Expanded Black";
 rim_radius = 5;
 rim_digit_size = 4;
+rim_rotation = 0;
 
 ring_width = 0.4;
 chip_center_diam = 15;
@@ -22,7 +23,7 @@ $fs = 1;
 
 module pinwheel(order) {
   bounds = chip_diam * 2;
-  if (order == 1) {
+  rotate(rim_rotation) if (order == 1) {
     translate([-bounds/2,-bounds/2])
       square([bounds/2,bounds]);
   } else {
@@ -47,7 +48,7 @@ module ring(order) {
 }
 
 module face_rings(order, bit) {
-  if (ring_width) rotate(11.25) union() {
+  if (ring_width) union() {
     for (i=[0:4]) if (4-order == i) {
       if (bit) ring(i);
     }
@@ -66,7 +67,7 @@ module chip_label(string, size, font) {
 
 module chip_edge_labels(order,bit,pos) {
   chip = 2 ^ order;
-  for (i = [pos:2:15]) {
+  rotate (-11.25+rim_rotation) for (i = [pos:2:15]) {
     rotate(-22.5*i) translate([0,chip_diam/2-rim_radius/2])
       chip_label(alphabet[i+chip*(floor(i/chip)+bit)],
         rim_digit_size, rim_font);
@@ -81,7 +82,7 @@ module chip_neg(order) {
     linear_extrude(2*detail_inset) union () {
       chip_edge_labels(order,1,0);
       difference() {
-        rotate(11.25) pinwheel(4);
+        pinwheel(4);
         circle(r=chip_diam/2-rim_radius);
         chip_edge_labels(order,1,1);
       }
@@ -96,7 +97,7 @@ module chip_neg(order) {
     linear_extrude(2*detail_inset) union () {
       chip_edge_labels(order,0,0);
       difference() {
-        rotate(11.25) pinwheel(4);
+        pinwheel(4);
         circle(r=chip_diam/2-rim_radius);
         chip_edge_labels(order,0,1);
       }
