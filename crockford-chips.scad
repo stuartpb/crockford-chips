@@ -13,16 +13,14 @@ decal_font = "Inconsolata:style=Expanded Black";
 decal_digit_size = 8;
 detail_inset = 0.4;
 
-bounds = chip_diam * 2;
-ring_r = (chip_diam/2 - chip_center_diam/2 - rim_radius) / 4;
-
 module pinwheel(order) {
+  bounds = chip_diam * 2;
   if (order == 1) {
     translate([-bounds/2,-bounds/2])
-      square([bounds,bounds/2]);
+      square([bounds/2,bounds]);
   } else {
     verts = 2^order;
-    union() for (i=[0:2:verts-1]) {
+    union() for (i=[1:2:verts-1]) {
       polygon([
         [0,0],
         [sin(360/verts*i)*bounds,cos(360/verts*i)*bounds],
@@ -32,9 +30,32 @@ module pinwheel(order) {
   }
 }
 
-module face_rings(order,bit) {
-  rotate(11.25) difference() {
-    circle(d = chip_diam);
+module face_rings(order, bit) {
+  center_r = chip_center_diam/2;
+  ring_r = (chip_diam/2 - center_r - rim_radius) / 
+    (order ? 4 : 5);
+  rotate(11.25) union() {
+    for (i=[0:3]) if (4-order == i) {
+        if (bit) difference() {
+          circle(r=center_r + ring_r*(i+1));
+          circle(r=center_r + ring_r*i);
+        }
+      }
+      else {
+      intersection() {
+        difference() {
+          circle(r=center_r + ring_r*(i+1));
+          circle(r=center_r + ring_r*i);
+        }
+        pinwheel(i);
+      }
+    }
+    if (order == 0 && bit) {
+      difference() {
+        circle(r=center_r + ring_r*5);
+        circle(r=center_r + ring_r*4);
+      }
+    }
   }
 }
 
@@ -59,7 +80,7 @@ module chip_neg(order) {
     linear_extrude(2*detail_inset) union () {
       chip_edge_labels(order,1,0);
       difference() {
-        rotate(-11.25) pinwheel(4);
+        rotate(11.25) pinwheel(4);
         circle(r=chip_diam/2-rim_radius);
         chip_edge_labels(order,1,1);
       }
@@ -68,18 +89,20 @@ module chip_neg(order) {
         chip_label(alphabet[2^order],
           decal_digit_size,decal_font);
       }
+      face_rings(order,1);
     }
   rotate([180,0,0]) translate([0,0,inset_height])
     linear_extrude(2*detail_inset) union () {
       chip_edge_labels(order,0,0);
       difference() {
-        rotate(-11.25) pinwheel(4);
+        rotate(11.25) pinwheel(4);
         circle(r=chip_diam/2-rim_radius);
         chip_edge_labels(order,0,1);
       }
       chip_label(alphabet[0],decal_digit_size,decal_font);
       translate([decal_digit_size/2,decal_digit_size/2])
         chip_label(alphabet[order],rim_digit_size,decal_font);
+      face_rings(order,0);
     }
 }
 module chip_detail(order) {
@@ -109,4 +132,5 @@ if (CHIP_ORDER>-1) {
   else chip_body(CHIP_ORDER); 
 } else {
   showcase();
+  //face_rings(0,1);
 }
