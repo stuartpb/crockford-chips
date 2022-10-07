@@ -4,14 +4,21 @@ alphabet = [
   "G","H","J","K","M","N","P","Q",
   "R","S","T","V","W","X","Y","Z"];
 chip_diam = 40;
-chip_center_diam = 10;
 chip_thickness = 3.5;
+
 rim_font = "Inconsolata:style=Expanded Black";
-rim_radius = 4;
-rim_digit_size = 3;
+rim_radius = 5;
+rim_digit_size = 4;
+
+ring_width = 0.4;
+chip_center_diam = 15;
 decal_font = "Inconsolata:style=Expanded Black";
-decal_digit_size = 8;
+decal_digit_size = 10;
+
 detail_inset = 0.4;
+
+$fa = 1;
+$fs = 1;
 
 module pinwheel(order) {
   bounds = chip_diam * 2;
@@ -30,30 +37,24 @@ module pinwheel(order) {
   }
 }
 
-module face_rings(order, bit) {
+module ring(order) {
   center_r = chip_center_diam/2;
-  ring_r = (chip_diam/2 - center_r - rim_radius) / 
-    (order ? 4 : 5);
-  rotate(11.25) union() {
-    for (i=[0:3]) if (4-order == i) {
-        if (bit) difference() {
-          circle(r=center_r + ring_r*(i+1));
-          circle(r=center_r + ring_r*i);
-        }
-      }
-      else {
-      intersection() {
-        difference() {
-          circle(r=center_r + ring_r*(i+1));
-          circle(r=center_r + ring_r*i);
-        }
-        pinwheel(i);
-      }
+  ring_r = (chip_diam/2 - center_r - rim_radius) / 6;
+  difference() {
+    circle(r=center_r + ring_r*(order+1) + ring_width/2);
+    circle(r=center_r + ring_r*(order+1) - ring_width/2);
+  }
+}
+
+module face_rings(order, bit) {
+  if (ring_width) rotate(11.25) union() {
+    for (i=[0:4]) if (4-order == i) {
+      if (bit) ring(i);
     }
-    if (order == 0 && bit) {
-      difference() {
-        circle(r=center_r + ring_r*5);
-        circle(r=center_r + ring_r*4);
+    else {
+      intersection() {
+        ring(i);
+        pinwheel(i<4-order?i+1:i);
       }
     }
   }
