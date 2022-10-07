@@ -9,7 +9,7 @@ chip_thickness = 3.5;
 rim_font = "Inconsolata:style=Expanded Black";
 rim_radius = 5;
 rim_digit_size = 4;
-rim_rotation = 0;
+rim_rotation = 11.25;
 
 ring_width = 0.4;
 chip_center_diam = 15;
