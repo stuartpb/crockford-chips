@@ -11,6 +11,8 @@ rim_radius = 5;
 rim_digit_size = 4;
 rim_rotation = 11.25;
 
+through_hole_diam = 0;
+
 ring_width = 0.4;
 chip_center_diam = 15;
 decal_font = "Inconsolata:style=Expanded Black";
@@ -75,7 +77,11 @@ module chip_edge_labels(order,bit,pos) {
 }
 
 module chip_base() {
-  cylinder(h=chip_thickness, d=chip_diam, center=true);
+  difference() {
+    cylinder(h=chip_thickness, d=chip_diam, center=true);
+    rotate([0,90,0])
+      cylinder(h=2*chip_diam, d=through_hole_diam, center=true);
+  }
 }
 
 module edge_striping(inner_r) {
