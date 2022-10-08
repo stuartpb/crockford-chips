@@ -18,7 +18,7 @@ chip_center_diam = 15;
 decal_font = "Inconsolata:style=Expanded Black";
 decal_digit_size = 10;
 
-detail_inset = 0.4;
+detail_inset = 0.8;
 
 $fa = 1;
 $fs = 1;
