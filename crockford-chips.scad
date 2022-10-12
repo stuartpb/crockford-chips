@@ -18,7 +18,7 @@ chip_center_diam = 15;
 decal_font = "Inconsolata:style=Expanded Black";
 decal_digit_size = 10;
 
-detail_inset = 0.8;
+detail_inset = 0.6;
 
 $fa = 1;
 $fs = 1;
@@ -91,24 +91,12 @@ module edge_striping(inner_r) {
   }
 }
 
-inset_height = chip_thickness/2 - detail_inset;
-
-module obverse() {
-  translate([0,0,inset_height]) linear_extrude(2*detail_inset)
-    children();
-}
-
 module obverse_decal(order) {
   difference() {
     circle(d=chip_center_diam);
     chip_label(alphabet[2^order],
       decal_digit_size,decal_font);
   }
-}
-
-module reverse() {
-  rotate([180,0,0]) translate([0,0,inset_height])
-    linear_extrude(2*detail_inset) children();
 }
 
 module reverse_decal(order) {
@@ -120,15 +108,21 @@ module reverse_decal(order) {
 }
 
 module chip_neg(order) {
+  inset_height = chip_thickness/2 - detail_inset;
   difference() {
     union () {
-      obverse() {
+      translate([0,0,inset_height-detail_inset])
+        linear_extrude(3*detail_inset) {
+
         chip_edge_labels(order,1,0);
         face_rings(order,1);
         obverse_decal(order);
         edge_striping(chip_diam/2-rim_radius);
       }
-      reverse() {
+      rotate([180,0,0])
+        translate([0,0,inset_height-detail_inset])
+        linear_extrude(3*detail_inset) {
+
         chip_edge_labels(order,0,0);
         face_rings(order,0);
         reverse_decal(order);
@@ -136,10 +130,16 @@ module chip_neg(order) {
       }
       translate([0,0,-chip_thickness/2])
         linear_extrude(chip_thickness)
-        edge_striping(chip_diam/2-detail_inset);
+        edge_striping(chip_diam/2-detail_inset*2);
+      translate([0,0,-chip_thickness/2 + detail_inset])
+        cylinder(d=chip_diam - 2*detail_inset,
+          h=chip_thickness - 2*detail_inset);
     }
-    obverse() chip_edge_labels(order,1,1);
-    reverse() chip_edge_labels(order,0,1);
+    
+    translate([0,0,inset_height])
+      linear_extrude(2*detail_inset) chip_edge_labels(order,1,1);
+    rotate([180,0,0]) translate([0,0,inset_height])
+      linear_extrude(2*detail_inset) chip_edge_labels(order,0,1);
   }
 }
 module chip_detail(order) {
