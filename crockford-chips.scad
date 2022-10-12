@@ -76,7 +76,7 @@ module chip_edge_labels(order,bit,pos) {
   }
 }
 
-module chip_base() {
+module chip_solid() {
   difference() {
     cylinder(h=chip_thickness, d=chip_diam, center=true);
     rotate([0,90,0])
@@ -107,7 +107,7 @@ module reverse_decal(order) {
   }
 }
 
-module chip_neg(order) {
+module chip_base_pos(order) {
   inset_height = chip_thickness/2 - detail_inset;
   difference() {
     union () {
@@ -142,32 +142,31 @@ module chip_neg(order) {
       linear_extrude(2*detail_inset) chip_edge_labels(order,0,1);
   }
 }
-module chip_detail(order) {
+module chip_base(order) {
   intersection() {
-    chip_base();
-    chip_neg(order);
+    chip_solid();
+    chip_base_pos(order);
   }
 }
-module chip_body(order,bcolor="black") {
+module chip_accent(order,bcolor="black") {
   difference() {
-    color(bcolor) chip_base();
-    color("white") chip_neg(order);
+    color(bcolor) chip_solid();
+    color("white") chip_base_pos(order);
   }
 }
 module showcase() {
-  translate([-chip_diam*3,0,0]) chip_body(4,"gold");
-  translate([-chip_diam*1.5,0,0]) chip_body(3,"black");
-  chip_body(2,"red");
-  translate([chip_diam*1.5,0,0]) chip_body(1,"green");
-  translate([chip_diam*3,0,0]) chip_body(0,"blue");
+  translate([-chip_diam*3,0,0]) chip_accent(4,"gold");
+  translate([-chip_diam*1.5,0,0]) chip_accent(3,"black");
+  chip_accent(2,"red");
+  translate([chip_diam*1.5,0,0]) chip_accent(1,"green");
+  translate([chip_diam*3,0,0]) chip_accent(0,"blue");
 }
 
 CHIP_ORDER=-1;
-CHIP_DETAIL=0;
+CHIP_MAT=0;
 if (CHIP_ORDER>-1) {
-  if (CHIP_DETAIL) chip_detail(CHIP_ORDER);
-  else chip_body(CHIP_ORDER); 
+  if (CHIP_MAT) chip_base(CHIP_ORDER);
+  else chip_accent(CHIP_ORDER); 
 } else {
   showcase();
-  //face_rings(0,1);
 }
